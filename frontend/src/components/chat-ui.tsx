@@ -32,18 +32,18 @@ export const ChatUI: React.FC<ChatUIProps> = ({
   const firstRender = useRef(true);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
-
   const interviewStarted = useAppSelector(
     (state) => state.user.interviewStarted
   );
   const interviewComplete = useAppSelector(
     (state) => state.user.interviewCompleted
   );
-
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef(input);
+  const hasAnsweredRef = useRef(false); // Track if user has already answered
+
   useEffect(() => {
     inputRef.current = input;
   }, [input]);
@@ -53,7 +53,9 @@ export const ChatUI: React.FC<ChatUIProps> = ({
       firstRender.current = false;
       return; // skip on first render
     }
-    if (!isRunning || !currentDuration) {
+
+    // Only send timeout message if timer actually stopped (not just reset) and user hasn't answered
+    if (!isRunning && currentDuration === 0 && !hasAnsweredRef.current) {
       const textToSend =
         inputRef.current.trim() || "DIDNT_ANSWERED_IN_SPECIFIED_TIME";
       handleSendAuto(textToSend);
@@ -71,7 +73,6 @@ export const ChatUI: React.FC<ChatUIProps> = ({
 
   const handleNewInterview = async () => {
     const result = await getInterviewResult(messages);
-    
     if (Object.keys(userDetails).length > 0) {
       // Save current chat + user details
       dispatch(completeInterview({ userDetails, result }));
@@ -84,6 +85,7 @@ export const ChatUI: React.FC<ChatUIProps> = ({
   const fetchNextQuestion = async (additionalMessages: ChatMessage[] = []) => {
     if (hasCompleted) dispatch(startInterview());
     setLoading(true);
+
     try {
       const {
         currUserDetails,
@@ -96,6 +98,9 @@ export const ChatUI: React.FC<ChatUIProps> = ({
       );
 
       dispatch(addMessage(nextQuestion));
+
+      // Reset the answered flag for the new question
+      hasAnsweredRef.current = false;
 
       // Only start timer if it's an interview question
       if (nextQuestion.type) {
@@ -126,8 +131,9 @@ export const ChatUI: React.FC<ChatUIProps> = ({
       role: "user",
       text,
     };
+
     dispatch(addMessage(userMessage));
-    setInput(""); // reset input
+    setInput("");
 
     await fetchNextQuestion([userMessage]);
   };
@@ -142,13 +148,16 @@ export const ChatUI: React.FC<ChatUIProps> = ({
   const handleSend = async () => {
     if (!input.trim()) return;
 
+    // Mark that user has answered to prevent timeout message
+    hasAnsweredRef.current = true;
+
     const userMessage: ChatMessage = {
       role: "user",
       text: input,
     };
+
     dispatch(addMessage(userMessage));
     setInput("");
-
     await fetchNextQuestion([userMessage]);
   };
 
