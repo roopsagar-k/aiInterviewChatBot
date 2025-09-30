@@ -3,6 +3,7 @@ import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Send } from "lucide-react";
 import type { ChatMessage, ParsedDataType } from "@/lib/types";
 import { addMessage, completeInterview } from "@/slices/chatSlice";
 import { getInterviewResult, getNextQuestion } from "@/lib/apis";
@@ -42,7 +43,7 @@ export const ChatUI: React.FC<ChatUIProps> = ({
   const [loading, setLoading] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef(input);
-  const hasAnsweredRef = useRef(false); 
+  const hasAnsweredRef = useRef(false);
 
   useEffect(() => {
     inputRef.current = input;
@@ -51,7 +52,7 @@ export const ChatUI: React.FC<ChatUIProps> = ({
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false;
-      return; 
+      return;
     }
 
     if (!isRunning && timeLeft === 0 && !hasAnsweredRef.current) {
@@ -205,9 +206,9 @@ export const ChatUI: React.FC<ChatUIProps> = ({
       </CardContent>
 
       {hasCompleted && !interviewStarted && !interviewComplete ? (
-        <div className="p-2">
+        <div className="p-4">
           <Button
-            className="w-full"
+            className="w-full h-14 text-lg"
             onClick={async () => {
               fetchNextQuestion();
             }}
@@ -217,7 +218,7 @@ export const ChatUI: React.FC<ChatUIProps> = ({
           </Button>
         </div>
       ) : interviewComplete ? (
-        <div className="p-2 text-center text-muted-foreground">
+        <div className="p-4 text-center text-muted-foreground">
           {submitting ? (
             <p>Submitting your response...</p>
           ) : (
@@ -225,16 +226,27 @@ export const ChatUI: React.FC<ChatUIProps> = ({
           )}
         </div>
       ) : (
-        <div className="flex gap-2 mt-2 p-2">
-          <Input
-            placeholder="Type your message..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          />
-          <Button onClick={handleSend} disabled={loading}>
-            {loading ? "..." : "Send"}
-          </Button>
+        <div className="border-t bg-background p-4 md:p-6">
+          <div className="flex items-center gap-2 md:gap-3 max-w-4xl mx-auto">
+            <div className="relative flex-1">
+              <Input
+                placeholder="Type your message..."
+                disabled={loading}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSend()}
+                className="h-12 md:h-14 text-base md:text-lg px-4 md:px-6 pr-12 rounded-full border-2 focus:border-primary transition-all"
+              />
+            </div>
+            <Button
+              onClick={handleSend}
+              disabled={loading || !input.trim()}
+              size="icon"
+              className="h-12 w-12 md:h-14 md:w-14 rounded-full flex-shrink-0"
+            >
+              <Send className="h-5 w-5 md:h-6 md:w-6" />
+            </Button>
+          </div>
         </div>
       )}
     </Card>
