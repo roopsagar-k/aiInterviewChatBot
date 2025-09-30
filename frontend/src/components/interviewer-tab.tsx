@@ -7,6 +7,8 @@ import { ChevronDown, ChevronUp, Search } from "lucide-react";
 interface FilteredChat {
   index: number;
   userName: string;
+  email: string;
+  phone: string;
   messages: { text: string; timestamp: number }[];
   interviewResult: {
     Points: number;
@@ -21,28 +23,29 @@ const InterviewerTab = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
-const filteredChats: FilteredChat[] = useMemo(() => {
-  return completedChats
-    .map((chat, idx) => ({
-      index: idx,
-      userName: chat.userDetails.name || "Unnamed",
-      messages: chat.messages.map((msg) => ({
-        text: msg.text,
-        timestamp: msg.timestamp,
-      })),
-      interviewResult: {
-        Points: chat.interviewResult.totalPoints || 0,
-        Pros: chat.interviewResult.pros || [],
-        Cons: chat.interviewResult.cons || [],
-        Summary: chat.interviewResult.summary || "",
-      },
-    }))
-    .filter((chat) =>
-      chat.userName.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .sort((a, b) => b.interviewResult.Points - a.interviewResult.Points);
-}, [completedChats, searchQuery]);
-
+  const filteredChats: FilteredChat[] = useMemo(() => {
+    return completedChats
+      .map((chat, idx) => ({
+        index: idx,
+        userName: chat.userDetails.name || "Unnamed",
+        email: chat.userDetails.email || "-",
+        phone: chat.userDetails.phone || "-",
+        messages: chat.messages.map((msg) => ({
+          text: msg.text,
+          timestamp: msg.timestamp,
+        })),
+        interviewResult: {
+          Points: chat.interviewResult.totalPoints || 0,
+          Pros: chat.interviewResult.pros || [],
+          Cons: chat.interviewResult.cons || [],
+          Summary: chat.interviewResult.summary || "",
+        },
+      }))
+      .filter((chat) =>
+        chat.userName.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      .sort((a, b) => b.interviewResult.Points - a.interviewResult.Points);
+  }, [completedChats, searchQuery]);
 
   return (
     <div className="p-4 space-y-4">
@@ -85,6 +88,20 @@ const filteredChats: FilteredChat[] = useMemo(() => {
 
               {expandedIndex === chat.index && (
                 <CardContent className="space-y-4">
+                  {/* User Details */}
+                  <div className="space-y-1">
+                    <p className="text-foreground">
+                      <span className="font-semibold">Name:</span>{" "}
+                      {chat.userName}
+                    </p>
+                    <p className="text-foreground">
+                      <span className="font-semibold">Email:</span> {chat.email}
+                    </p>
+                    <p className="text-foreground">
+                      <span className="font-semibold">Phone:</span> {chat.phone}
+                    </p>
+                  </div>
+
                   {/* Scores & Feedback */}
                   <div>
                     <p className="font-semibold text-foreground">Pros:</p>
