@@ -28,7 +28,7 @@ export const ChatUI: React.FC<ChatUIProps> = ({
   const dispatch = useAppDispatch();
   const messages = useAppSelector((state) => state.chat.messages);
   const hasCompleted = useAppSelector((state) => state.user.hasCompleteDetails);
-  const { isRunning, currentDuration } = useAppSelector((state) => state.timer);
+  const { isRunning, timeLeft } = useAppSelector((state) => state.timer);
   const firstRender = useRef(true);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ export const ChatUI: React.FC<ChatUIProps> = ({
   const [loading, setLoading] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef(input);
-  const hasAnsweredRef = useRef(false); // Track if user has already answered
+  const hasAnsweredRef = useRef(false); 
 
   useEffect(() => {
     inputRef.current = input;
@@ -51,16 +51,15 @@ export const ChatUI: React.FC<ChatUIProps> = ({
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false;
-      return; // skip on first render
+      return; 
     }
 
-    // Only send timeout message if timer actually stopped (not just reset) and user hasn't answered
-    if (!isRunning && currentDuration === 0 && !hasAnsweredRef.current) {
+    if (!isRunning && timeLeft === 0 && !hasAnsweredRef.current) {
       const textToSend =
         inputRef.current.trim() || "DIDNT_ANSWERED_IN_SPECIFIED_TIME";
       handleSendAuto(textToSend);
     }
-  }, [isRunning, currentDuration]);
+  }, [isRunning, timeLeft]);
 
   useEffect(() => {
     if (interviewComplete) {
@@ -138,7 +137,6 @@ export const ChatUI: React.FC<ChatUIProps> = ({
     await fetchNextQuestion([userMessage]);
   };
 
-  // Auto-trigger first AI question on mount
   useEffect(() => {
     if (messages.length === 0 && Object.keys(userDetails).length > 0) {
       fetchNextQuestion();
@@ -148,7 +146,6 @@ export const ChatUI: React.FC<ChatUIProps> = ({
   const handleSend = async () => {
     if (!input.trim()) return;
 
-    // Mark that user has answered to prevent timeout message
     hasAnsweredRef.current = true;
 
     const userMessage: ChatMessage = {
@@ -198,6 +195,13 @@ export const ChatUI: React.FC<ChatUIProps> = ({
             )}
           </div>
         ))}
+
+        {/* Show typing indicator when loading */}
+        {loading && (
+          <div className="p-2 rounded-md max-w-[80%] bg-muted text-muted-foreground self-start">
+            <span className="animate-pulse">AI is typing...</span>
+          </div>
+        )}
       </CardContent>
 
       {hasCompleted && !interviewStarted && !interviewComplete ? (
