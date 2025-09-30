@@ -14,9 +14,9 @@ const initialState: TimerState = {
 };
 
 const difficultyDurations: Record<"easy" | "medium" | "hard", number> = {
-  easy: 2, //20
-  medium: 2, //60
-  hard: 2, //120
+  easy: 20, //20
+  medium: 60, //60
+  hard: 120, //120
 };
 
 const timerSlice = createSlice({

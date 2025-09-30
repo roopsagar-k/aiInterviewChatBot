@@ -3,12 +3,13 @@ import routes from "./routes";
 import cors from "cors";
 import ApiError from "./utils/api-error";
 import { Request, Response, NextFunction } from "express";
+import { ENV } from "./config/env";
 
 export const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ENV.CLIENT_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
